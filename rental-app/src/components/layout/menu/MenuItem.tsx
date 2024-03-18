@@ -17,7 +17,7 @@ const MenuItem: React.FC = () => {
         optio.
       </p>
       <button className="bg-primary text-white rounded-full mt-4 px-8 py-2">
-        Add $20
+        Rent $20
       </button>
     </div>
   );

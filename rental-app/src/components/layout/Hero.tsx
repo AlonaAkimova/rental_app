@@ -5,7 +5,7 @@ interface HeroProps {}
 const Hero: React.FC<HeroProps> = (props) => {
   return (
     <>
-      <section className="hero">
+      <section className="hero mt-4">
         <div className="py-12">
           <h1 className="text 4xl font-semibold leading-normal">
             Welcome to <span className="text-primary">Closet Carousel</span>
