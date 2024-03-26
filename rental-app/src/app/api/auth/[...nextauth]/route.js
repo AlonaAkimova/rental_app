@@ -6,6 +6,12 @@ import bcrypt from "bcrypt";
 import GoogleProvider from "next-auth/providers/google";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/libs/mongoConnect";
+
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
+
 export const authOptions = {
   secret: process.env.SECRET,
   adapter: MongoDBAdapter(clientPromise),
@@ -25,23 +31,24 @@ export const authOptions = {
         },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        const email = credentials?.email;
-        const password = credentials?.password;
-        console.log("Email:", email);
-        console.log("Password:", password);
-        mongoose.connect(process.env.MONGO_URL);
-        const user = await User.findOne({ email });
-        console.log("User:", user);
-        const passwordOk = user && bcrypt.compareSync(password, user.password);
-        console.log("PasswordOk:", passwordOk);
-        if (passwordOk) {
+      async authorize(credentials) {
+        const { email, password } = credentials;
+
+        try {
+          const user = await User.findOne({ email });
+          if (!user || !bcrypt.compareSync(password, user.password)) {
+            return null;
+          }
           return user;
+        } catch (error) {
+          console.error("Authorization error:", error);
+          throw new Error("Failed to authenticate");
         }
-        return null;
       },
     }),
   ],
 };
+
+// NextAuth handler
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
