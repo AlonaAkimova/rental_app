@@ -6,8 +6,12 @@ const nextConfig = {
         protocol: "https",
         hostname: "*googleusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "rental-app-alona.s3.amazonaws.com",
+      },
     ],
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
