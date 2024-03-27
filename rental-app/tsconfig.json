@@ -29,7 +29,8 @@
     "src/app/api/auth/[...nextauth]/route.js",
     "src/libs/mongoConnect.js",
     "src/app/api/profile/route.js",
-    "src/app/api/register/route.js"
+    "src/app/api/register/route.js",
+    "next.config.js"
   ],
   "exclude": ["node_modules"]
 }
