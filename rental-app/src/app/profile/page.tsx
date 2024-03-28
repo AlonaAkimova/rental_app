@@ -1,6 +1,8 @@
 "use client";
+import UserTabs from "@/components/layout/UserTabs";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { resolve } from "path";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -13,6 +15,7 @@ const ProfilePage: React.FC = () => {
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const { status } = session;
 
   useEffect(() => {
@@ -27,6 +30,7 @@ const ProfilePage: React.FC = () => {
           setPostalCode(data.postalCode);
           setCity(data.city);
           setCountry(data.country);
+          setIsAdmin(data.admin);
         });
       });
     }
@@ -86,8 +90,8 @@ const ProfilePage: React.FC = () => {
   return (
     <>
       <section className="mt-8">
-        <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
-        <div className="max-w-md mx-auto">
+        <UserTabs isAdmin={isAdmin} />
+        <div className="max-w-md mx-auto mt-8">
           <div className="flex gap-4">
             <div>
               <div className="p-4 rounded-lg relative max-w-[120]">
