@@ -1,42 +1,63 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { resolve } from "path";
 import React, { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 const ProfilePage: React.FC = () => {
   const session = useSession();
   const [userName, setUserName] = useState("");
   const [image, setImage] = useState("");
-  const [saved, setSaved] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [postalCode, setPostalCode] = useState("");
+  const [country, setCountry] = useState("");
+  const [city, setCity] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
   const { status } = session;
 
   useEffect(() => {
     if (status === "authenticated") {
-      setUserName(session.data?.user?.name || "");
+      const name = session.data?.user?.name || "";
+      setUserName(name);
       setImage(session.data?.user?.image || "");
+      fetch("/api/profile").then((response) => {
+        response.json().then((data) => {
+          setPhone(data.phone);
+          setStreetAddress(data.streetAddress);
+          setPostalCode(data.postalCode);
+          setCity(data.city);
+          setCountry(data.country);
+        });
+      });
     }
   }, [session, status]);
   async function handleProfileInfoUpdate(e: { preventDefault: () => void }) {
     e.preventDefault();
-    setSaved(false);
-    setIsSaving(true);
-    const response = await fetch("/api/profile", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: userName }),
+    const savingPromise = new Promise<void>(async (resolve, reject) => {
+      const response = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: userName,
+          image,
+          streetAddress,
+          phone,
+          postalCode,
+          city,
+          country,
+        }),
+      });
+      if (response.ok) {
+        resolve();
+      } else {
+        reject();
+      }
     });
-    setIsSaving(false);
-    if (response.ok) {
-      setSaved(true);
-    }
-  }
-  if (status === "loading") {
-    return "Loading ...";
-  }
-  if (status === "unauthenticated") {
-    return redirect("/login");
+    await toast.promise(savingPromise, {
+      loading: "Saving...",
+      success: "Profile saved!",
+      error: "Error",
+    });
   }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -44,34 +65,32 @@ const ProfilePage: React.FC = () => {
     if (files && files.length === 1) {
       const data = new FormData();
       data.set("files", files[0]);
-      const response = await fetch("/api/upload", {
+      const uploadPromise = fetch("/api/upload", {
         method: "POST",
         body: data,
+      }).then((response) => {
+        if (response.ok) {
+          return response.json().then((link) => {
+            setImage(link);
+          });
+        }
+        throw new Error("Something went wrong");
       });
-      const link = await response.json();
-      setImage(link);
+      toast.promise(uploadPromise, {
+        loading: "Saving...",
+        success: "Upload complete!",
+        error: "Upload error",
+      });
     }
   }
   return (
     <>
       <section className="mt-8">
         <h1 className="text-center text-primary text-4xl mb-4">Profile</h1>
-
         <div className="max-w-md mx-auto">
-          {saved && (
-            <h2 className="text-center border border-green-300 bg-green-100 rounded-lg p-4">
-              Profile saved
-            </h2>
-          )}
-          {isSaving && (
-            <h2 className="text-center border border-blue-300 bg-blue-100 rounded-lg p-4">
-              Saving...
-            </h2>
-          )}
-
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-4">
             <div>
-              <div className="p-4 rounded-lg relative">
+              <div className="p-4 rounded-lg relative max-w-[120]">
                 {image && (
                   <Image
                     className="rounded-lg w-full h-full mb-2"
@@ -81,7 +100,6 @@ const ProfilePage: React.FC = () => {
                     alt="avatar"
                   />
                 )}
-
                 <label>
                   <input
                     type="file"
@@ -98,6 +116,7 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <form className="grow" onSubmit={handleProfileInfoUpdate}>
+              <label>First and last Name</label>
               <input
                 type="text"
                 id="userName"
@@ -105,12 +124,58 @@ const ProfilePage: React.FC = () => {
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
               />
+              <label>Email</label>
               <input
                 type="email"
                 id="email"
                 disabled={true}
-                value={session.data?.user?.email || undefined}
+                value={session.data?.user?.email || ""}
+                placeholder="email"
               />
+              <label>Phone</label>
+              <input
+                type="tel"
+                id="phone"
+                value={phone}
+                onChange={(ev) => setPhone(ev.target.value)}
+                required
+                placeholder="Phone number"
+              />
+              <label>Street Address</label>
+              <input
+                type="text"
+                placeholder="Street address"
+                value={streetAddress}
+                onChange={(ev) => setStreetAddress(ev.target.value)}
+              />
+              <div className="flex gap-2">
+                <div>
+                  <label>City</label>
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={city}
+                    onChange={(ev) => setCity(ev.target.value)}
+                  />
+                </div>
+                <div>
+                  <label>Postal Code</label>
+                  <input
+                    type="text"
+                    placeholder="Postal Code"
+                    value={postalCode}
+                    onChange={(ev) => setPostalCode(ev.target.value)}
+                  />
+                </div>
+              </div>
+              <label>Country</label>
+              <input
+                type="text"
+                placeholder="Country"
+                value={country}
+                onChange={(ev) => setCountry(ev.target.value)}
+              />
+
               <button type="submit">Save</button>
             </form>
           </div>
