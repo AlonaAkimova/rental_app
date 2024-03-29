@@ -39,7 +39,7 @@ button {
 /* Submit button styles */
 button[type="submit"],
 .submit {
-  @apply border-0 bg-primary text-white;
+  @apply border-primary bg-primary text-white;
 }
 
 /* Disabled submit button styles */

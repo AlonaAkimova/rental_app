@@ -30,7 +30,8 @@
     "src/libs/mongoConnect.js",
     "src/app/api/profile/route.js",
     "src/app/api/register/route.js",
-    "next.config.js"
+    "next.config.js",
+    "src/components/UseProfile.tsx"
   ],
   "exclude": ["node_modules"]
 }
