@@ -2,7 +2,6 @@
 import UserTabs from "@/components/layout/UserTabs";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import Link from "next/link";
 import { resolve } from "path";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -16,6 +15,7 @@ const ProfilePage: React.FC = () => {
   const [city, setCity] = useState("");
   const [streetAddress, setStreetAddress] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [profileFetched, setProfileFetched] = useState(false);
   const { status } = session;
 
   useEffect(() => {
@@ -31,6 +31,7 @@ const ProfilePage: React.FC = () => {
           setCity(data.city);
           setCountry(data.country);
           setIsAdmin(data.admin);
+          setProfileFetched(true);
         });
       });
     }
@@ -86,6 +87,10 @@ const ProfilePage: React.FC = () => {
         error: "Upload error",
       });
     }
+  }
+
+  if (status === "loading" || !profileFetched) {
+    return "Loading...";
   }
   return (
     <>
