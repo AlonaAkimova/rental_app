@@ -1,4 +1,5 @@
 "use client";
+import EditImage from "@/components/layout/EditImage";
 import UserTabs from "@/components/layout/UserTabs";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
@@ -65,30 +66,6 @@ const ProfilePage: React.FC = () => {
     });
   }
 
-  async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const files = event.target.files;
-    if (files && files.length === 1) {
-      const data = new FormData();
-      data.set("files", files[0]);
-      const uploadPromise = fetch("/api/upload", {
-        method: "POST",
-        body: data,
-      }).then((response) => {
-        if (response.ok) {
-          return response.json().then((link) => {
-            setImage(link);
-          });
-        }
-        throw new Error("Something went wrong");
-      });
-      toast.promise(uploadPromise, {
-        loading: "Saving...",
-        success: "Upload complete!",
-        error: "Upload error",
-      });
-    }
-  }
-
   if (status === "loading" || !profileFetched) {
     return "Loading...";
   }
@@ -100,28 +77,7 @@ const ProfilePage: React.FC = () => {
           <div className="flex gap-4">
             <div>
               <div className="p-4 rounded-lg relative max-w-[120]">
-                {image && (
-                  <Image
-                    className="rounded-lg w-full h-full mb-2"
-                    src={image}
-                    width={96}
-                    height={96}
-                    alt="avatar"
-                  />
-                )}
-                <label>
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handleFileChange}
-                  />
-                  <span
-                    onClick={() => {}}
-                    className="block border rounded-lg p-2 text-center border-gray-300 cursor-pointer"
-                  >
-                    Edit
-                  </span>
-                </label>
+                <EditImage link={image} setLink={setImage} />
               </div>
             </div>
             <form className="grow" onSubmit={handleProfileInfoUpdate}>

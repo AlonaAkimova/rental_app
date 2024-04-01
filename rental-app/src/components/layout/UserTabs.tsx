@@ -23,7 +23,7 @@ const UserTabs: React.FC<UserTabsProps> = ({ isAdmin }) => {
               Categories
             </Link>
             <Link
-              className={path === "/cloths-items" ? "active" : ""}
+              className={path.includes("cloths-items") ? "active" : ""}
               href={"/cloths-items"}
             >
               Cloths items
