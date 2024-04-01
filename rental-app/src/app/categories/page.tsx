@@ -18,11 +18,19 @@ const CategoriesPage: React.FC = () => {
   }, []);
 
   function fetchCategories() {
-    fetch("/api/categories").then((res) => {
-      res.json().then((categories) => {
+    fetch("/api/categories")
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        return res.json();
+      })
+      .then((categories) => {
         setCategories(categories);
+      })
+      .catch((error) => {
+        console.error("Error fetching categories:", error);
       });
-    });
   }
   async function handleCategorySubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
